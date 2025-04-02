@@ -1,0 +1,28 @@
+#define EE_HANDS
+// não defina MASTER_LEFT ou MASTER_RIGHT
+
+
+#define SERIAL_USART_FULL_DUPLEX
+#define SERIAL_USART_DRIVER SIOD0
+#define SERIAL_USART_TX_PIN GP20
+#define SERIAL_USART_RX_PIN GP21
+#define SERIAL_PIO_USE_PIO0    // Comunicação split via PIO0
+
+
+
+// Sempre defina os pinos para satisfazer o compilador
+#define ANALOG_JOYSTICK_X_AXIS_PIN GP26
+#define ANALOG_JOYSTICK_Y_AXIS_PIN GP27
+
+#define JOYSTICK_BUTTON_COUNT 0
+#define ANALOG_JOYSTICK_AXIS_MIN 0
+#define ANALOG_JOYSTICK_SPEED_REGULATOR 16
+#define JOYSTICK_AXIS_COUNT 2
+
+#define MOUSEKEY_INTERVAL    20
+#define MOUSEKEY_DELAY       0
+#define MOUSEKEY_TIME_TO_MAX 60
+#define MOUSEKEY_MAX_SPEED   7
+#define MOUSEKEY_WHEEL_DELAY 0
+
+#pragma once
