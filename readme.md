@@ -1,36 +1,184 @@
-# Quantum Mechanical Keyboard Firmware
+# QMK Firmware – Custom Dactyl Manuform 5x6 (giacomeli)
 
-[![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
-[![Discord](https://img.shields.io/discord/440868230475677696.svg)](https://discord.gg/qmk)
-[![Docs Status](https://img.shields.io/badge/docs-ready-orange.svg)](https://docs.qmk.fm)
-[![GitHub contributors](https://img.shields.io/github/contributors/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/pulse/monthly)
-[![GitHub forks](https://img.shields.io/github/forks/qmk/qmk_firmware.svg?style=social&label=Fork)](https://github.com/qmk/qmk_firmware/)
+This repository contains a custom [QMK Firmware](https://qmk.fm) setup for a handwired **Dactyl Manuform 5x6 split keyboard** using **RP2040 microcontrollers**.
 
-This is a keyboard firmware based on the [tmk\_keyboard firmware](https://github.com/tmk/tmk_keyboard) with some useful features for Atmel AVR and ARM controllers, and more specifically, the [OLKB product line](https://olkb.com), the [ErgoDox EZ](https://ergodox-ez.com) keyboard, and the Clueboard product line.
+Features:
+- 5x6 split layout
+- RP2040 (e.g., Raspberry Pi Pico)
+- **Serial split communication** via `USART` using **PIO0** (GP0 and GP1)
+- **Joystick** connected to the **right half** (GP26 and GP27)
+- **WS2812 RGB LED strip** connected to GP29 using **PIO1**
+- Split logic using `EE_HANDS` (no hardcoded master)
 
-## Documentation
+---
 
-* [See the official documentation on docs.qmk.fm](https://docs.qmk.fm)
+## 🧰 Requirements
 
-The docs are powered by [VitePress](https://vitepress.dev/). They are also viewable offline; see [Previewing the Documentation](https://docs.qmk.fm/#/contributing?id=previewing-the-documentation) for more details.
+Before continuing, ensure you have the following installed:
 
-You can request changes by making a fork and opening a [pull request](https://github.com/qmk/qmk_firmware/pulls).
+- Python 3
+- QMK CLI (`pip install qmk`)
+- `arm-none-eabi-gcc` (via Homebrew, APT, or other)
+- `make` and standard development tools
+- A working `qmk_firmware` folder with submodules initialized
 
-## Supported Keyboards
+---
 
-* [Planck](/keyboards/planck/)
-* [Preonic](/keyboards/preonic/)
-* [ErgoDox EZ](/keyboards/ergodox_ez/)
-* [Clueboard](/keyboards/clueboard/)
-* [Cluepad](/keyboards/clueboard/17/)
-* [Atreus](/keyboards/atreus/)
+## 📦 Step 1: Clone this repository
 
-The project also includes community support for [lots of other keyboards](/keyboards/).
+```bash
+git clone --recurse-submodules git@github.com:giacomeli/qmk_firmware.git
+cd qmk_firmware
 
-## Maintainers
+If you forgot --recurse-submodules, run:
 
-QMK is developed and maintained by Jack Humbert of OLKB with contributions from the community, and of course, [Hasu](https://github.com/tmk). The OLKB product firmwares are maintained by [Jack Humbert](https://github.com/jackhumbert), the Ergodox EZ by [ZSA Technology Labs](https://github.com/zsa), the Clueboard by [Zach White](https://github.com/skullydazed), and the Atreus by [Phil Hagelberg](https://github.com/technomancy).
+git submodule update --init --recursive
 
-## Official Website
 
-[qmk.fm](https://qmk.fm) is the official website of QMK, where you can find links to this page, the documentation, and the keyboards supported by QMK.
+
+⸻
+
+📁 Step 2: Locate your custom keyboard folder
+
+Your custom layout is located at:
+
+keyboards/handwired/dactyl_manuform/giacomeli_5x6/
+
+
+
+⸻
+
+⚙️ Step 3: EEPROM-based split configuration
+
+This keyboard uses EE_HANDS to determine whether a half is the left or right side.
+You do not need to define MASTER_LEFT or MASTER_RIGHT.
+
+Inside config.h:
+
+#define EE_HANDS
+
+You will flash a persistent setting into each half’s EEPROM to define its role.
+
+⸻
+
+💻 Step 4: Compile firmware for both halves
+
+You must compile firmware for each side separately.
+
+Left half:
+
+qmk compile -kb handwired/dactyl_manuform/giacomeli_5x6 -km default -bl uf2-split-left
+
+Right half:
+
+qmk compile -kb handwired/dactyl_manuform/giacomeli_5x6 -km default -bl uf2-split-right
+
+This produces .uf2 files which you can drag into your RP2040 device after entering bootloader mode.
+
+⸻
+
+🔁 Step 5: Flash and set EEPROM hand info
+
+This step configures each half so that the firmware knows whether it is the left or right.
+
+Flash left half and set eeconfig_hands=left
+
+qmk flash -kb handwired/dactyl_manuform/giacomeli_5x6 -km default -bl uf2-split-left -e "eeconfig_hands=left"
+
+Flash right half and set eeconfig_hands=right
+
+qmk flash -kb handwired/dactyl_manuform/giacomeli_5x6 -km default -bl uf2-split-right -e "eeconfig_hands=right"
+
+
+
+⸻
+
+🧠 How the split communication works
+
+This keyboard uses serial communication between halves via PIO0:
+	•	TX (GP0) → connect to RX (GP1) on the other half
+	•	RX (GP1) ← connect from TX (GP0) of the other half
+	•	GND must be connected between both boards
+	•	VCC can be shared if only one side is powered by USB
+
+In config.h:
+
+#define SERIAL_USART_FULL_DUPLEX
+#define SERIAL_USART_DRIVER SIOD0
+#define SERIAL_USART_TX_PIN GP0
+#define SERIAL_USART_RX_PIN GP1
+#define SERIAL_PIO_USE_PIO0
+
+
+
+⸻
+
+🎮 Joystick setup (only on right half)
+	•	X-axis on GP26
+	•	Y-axis on GP27
+
+The firmware dynamically checks which side is running, and only enables joystick input on the right half using is_keyboard_right().
+
+report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
+    if (!is_keyboard_right()) {
+        mouse_report.x = 0;
+        mouse_report.y = 0;
+        return mouse_report;
+    }
+
+    // invert X-axis
+    mouse_report.x = -mouse_report.x;
+    return mouse_report;
+}
+
+
+
+⸻
+
+🌈 RGB LED configuration (WS2812)
+
+WS2812 (NeoPixel) RGB LEDs are connected to GP29, using PIO1 to avoid conflicts with serial transport.
+
+In config.h:
+
+#define RGB_DI_PIN GP29
+#define WS2812_PIO_USE_PIO1
+#define RGBLIGHT_LED_COUNT 12  // Change to your number of LEDs
+#define RGBLIGHT_EFFECT_BREATHING
+#define RGBLIGHT_EFFECT_RAINBOW_MOOD
+#define RGBLIGHT_SPLIT
+
+In rules.mk:
+
+RGBLIGHT_ENABLE = yes
+WS2812_DRIVER = vendor
+
+
+
+⸻
+
+🧪 Debugging
+
+You can use qmk console to monitor output and ensure the split is working:
+
+qmk console
+
+Look for messages like:
+
+handedness: left
+
+Or joystick movement, keypress events, etc.
+
+⸻
+
+🧼 Optional: clean the build
+
+qmk clean
+
+
+
+⸻
+
+📄 License
+
+This project is based on QMK Firmware, licensed under the MIT License.
