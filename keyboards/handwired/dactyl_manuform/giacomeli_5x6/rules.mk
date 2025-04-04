@@ -13,3 +13,4 @@ SPLIT_KEYBOARD = yes
 KEYBOARD_FILES += keyboards/handwired/dactyl_manuform/giacomeli_5x6/keyboard.json
 CONSOLE_ENABLE = yes
 DEBUG_MATRIX_SCAN_RATE = yes
+MOUSEKEY_ENABLE = yes

@@ -1,6 +1,7 @@
 # QMK Firmware – Custom Dactyl Manuform 5x6 (giacomeli)
 
-This repository contains a custom [QMK Firmware](https://qmk.fm) setup for a handwired **Dactyl Manuform 5x6 split keyboard** using **RP2040 microcontrollers**.
+This repository contains a custom [QMK Firmware](https://qmk.fm) setup for a handwired **Dactyl Manuform 5x6 split keyboard** using [**RP2040 microcontrollers**](https://docs.qmk.fm/platformdev_rp2040).
+
 
 Features:
 - 5x6 split layout

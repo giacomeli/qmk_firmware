@@ -1,6 +1,11 @@
 #include QMK_KEYBOARD_H
-
+#include "analog.h"
 #include "print.h"
+
+#define _QWERTY 0
+#define _RAISE 1
+
+#define RAISE MO(_RAISE)
 
 void matrix_scan_user(void) {
     static bool debug_once = false;
@@ -17,9 +22,6 @@ void matrix_scan_user(void) {
     }
 }
 
-
-#include "analog.h"
-
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     if (is_keyboard_left()) {
         mouse_report.x = 0;
@@ -31,51 +33,23 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     return mouse_report;
 }
 
-#define _QWERTY 0
-#define _LOWER 1
-#define _RAISE 2
-
-#define RAISE MO(_RAISE)
-#define LOWER MO(_LOWER)
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_QWERTY] = LAYOUT_5x6(
-        // Row 0:  6 left + 6 right = 12
-        KC_ESC, KC_1,   KC_2,   KC_3,   KC_4,   KC_5,       KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_BSPC,
-        // Row 1
-        KC_TAB, KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,    KC_MINS,
-        // Row 2
-        KC_LSFT,KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,   KC_L,   KC_SCLN, KC_QUOT,
-        // Row 3
-        KC_LCTL,KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH, KC_BSLS,
-        // Row 4 (a “última fileira” - 6 keys left, 6 keys right)
-        KC_LBRC,KC_RBRC,RAISE,  KC_SPC, KC_TAB, KC_HOME,     KC_1,   KC_2,   KC_3,   KC_4,   KC_7,    KC_8
+        KC_1,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,       KC_7,   KC_8,   KC_9,    KC_0,    KC_MINS,  KC_EQL,
+        KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,    KC_O,    KC_P,     KC_LBRC,
+        KC_LSFT, KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,    KC_L,    KC_SCLN,  KC_QUOT,
+        RAISE,   KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH,  RAISE,
+
+                            KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
+                                    KC_LALT, KC_LCTL,         KC_ENT, KC_BTN1, KC_BTN2
     ),
-
-    [_LOWER] = LAYOUT_5x6(
-        // Row 0:  6 left + 6 right = 12
-        KC_ESC, KC_1,   KC_2,   KC_3,   KC_4,   KC_5,       KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_BSPC,
-        // Row 1
-        KC_TAB, KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,    KC_MINS,
-        // Row 2
-        KC_LSFT,KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,   KC_L,   KC_SCLN, KC_QUOT,
-        // Row 3
-        KC_LCTL,KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH, KC_BSLS,
-        // Row 4 (a “última fileira” - 6 keys left, 6 keys right)
-        KC_LBRC,KC_RBRC,RAISE,  KC_SPC, KC_TAB, KC_HOME,    KC_1,   KC_2,   KC_3,   KC_4,   KC_7,    KC_8
-
-    ),
-
     [_RAISE] = LAYOUT_5x6(
-          // Row 0:  6 left + 6 right = 12
-        KC_ESC, KC_1,   KC_2,   KC_3,   KC_4,   KC_5,       KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_BSPC,
-        // Row 1
-        KC_TAB, KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,    KC_MINS,
-        // Row 2
-        KC_LSFT,KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,   KC_L,   KC_SCLN, KC_QUOT,
-        // Row 3
-        KC_LCTL,KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM,KC_DOT, KC_SLSH, KC_BSLS,
-        // Row 4 (a “última fileira” - 6 keys left, 6 keys right)
-        KC_LBRC,KC_RBRC,RAISE,  KC_SPC, KC_TAB, KC_HOME,    KC_1,   KC_2,   KC_3,   KC_4,   KC_7,    KC_8
+        KC_GRV,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,     KC_BRMD, KC_BRMU,    KC_9,    KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
+        KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,    KC_U,       KC_I,    KC_O,     KC_P,     KC_RBRC,
+        KC_LSFT, KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_LEFT, KC_DOWN,    KC_UP,   KC_RIGHT, KC_SCLN,  KC_BSLS,
+        RAISE,   KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,    KC_HOME,    KC_END,  KC_DOT,   KC_BSLS,  RAISE,
+
+                            KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
+                                    KC_LALT, KC_LCTL,         KC_ENT, MS_WHLU, MS_WHLD
     )
 };
