@@ -44,12 +44,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                     KC_LALT, KC_LCTL,         KC_ENT, KC_BTN1, KC_BTN2
     ),
     [_RAISE] = LAYOUT_5x6(
-        KC_GRV,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,     KC_BRMD, KC_BRMU,    KC_9,    KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
-        KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,    KC_U,       KC_I,    KC_O,     KC_P,     KC_RBRC,
-        KC_LSFT, KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_LEFT, KC_DOWN,    KC_UP,   KC_RIGHT, KC_SCLN,  KC_BSLS,
-        RAISE,   KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,    KC_HOME,    KC_END,  KC_DOT,   KC_BSLS,  RAISE,
+        KC_GRV,  _______, _______, _______, _______, _______,           KC_BRMD,  KC_BRMU,  _______,    KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
+        KC_ESC,  _______, _______, _______, _______, _______,           KC_Y,     KC_U,     KC_I,    KC_O,     KC_P,     KC_RBRC,
+        KC_LSFT, _______, _______, _______, _______, _______,           KC_LEFT,  KC_DOWN,  KC_UP,   KC_RIGHT, _______,  KC_PIPE,
+        KC_LCTL,   _______, _______, _______, _______, _______,           _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  RAISE,
 
-                            KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
-                                    KC_LALT, KC_LCTL,         KC_ENT, MS_WHLU, MS_WHLD
+                                        KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
+                                                RAISE,   KC_LALT,         KC_ENT, MS_WHLU, MS_WHLD
     )
 };
