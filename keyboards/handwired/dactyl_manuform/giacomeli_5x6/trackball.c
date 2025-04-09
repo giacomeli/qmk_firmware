@@ -6,9 +6,10 @@
 #define PIN_YP GP17
 #define PIN_YN GP18
 
-#define BASE_MOVE_PIXELS      10
+#define BASE_MOVE_PIXELS      7
 #define EXPONENTIAL_BOUND     10
-#define EXPONENTIAL_BASE      1.1
+#define EXPONENTIAL_BASE      1.2
+#define MOVE_DEBOUNCE_DELTA   3
 
 static uint8_t last_state_xp = 1;
 static uint8_t last_state_xn = 1;
@@ -16,21 +17,6 @@ static uint8_t last_state_yp = 1;
 static uint8_t last_state_yn = 1;
 
 static uint16_t last_time = 0;
-
-static int calculate_movement(bool triggered, bool positive, uint16_t delta) {
-    if (!triggered) return 0;
-
-    int exp = EXPONENTIAL_BOUND - delta;
-    if (exp < 1) exp = 1;
-
-    double factor = 1.0;
-    for (int i = 0; i < exp; i++) {
-        factor *= EXPONENTIAL_BASE;
-    }
-
-    int movement = (int)(BASE_MOVE_PIXELS * factor);
-    return positive ? movement : -movement;
-}
 
 void matrix_init_kb(void) {
     setPinInputHigh(PIN_XP);
@@ -48,43 +34,54 @@ void matrix_scan_kb(void) {
     uint8_t state_yp = readPin(PIN_YP);
     uint8_t state_yn = readPin(PIN_YN);
 
-    uint16_t now = timer_read();
-    uint16_t delta = now - last_time;
-
+    int8_t vec_x = 0;
+    int8_t vec_y = 0;
     bool moved = false;
-    int move_x = 0;
-    int move_y = 0;
 
     if (state_xp != last_state_xp) {
         last_state_xp = state_xp;
+        vec_x += 1;
         moved = true;
-        move_x += calculate_movement(true, true, delta);
     }
-
     if (state_xn != last_state_xn) {
         last_state_xn = state_xn;
+        vec_x -= 1;
         moved = true;
-        move_x += calculate_movement(true, false, delta);
     }
-
     if (state_yp != last_state_yp) {
         last_state_yp = state_yp;
+        vec_y -= 1;
         moved = true;
-        move_y += calculate_movement(true, false, delta);
     }
-
     if (state_yn != last_state_yn) {
         last_state_yn = state_yn;
+        vec_y += 1;
         moved = true;
-        move_y += calculate_movement(true, true, delta);
     }
 
-    if (moved) {
-        last_time = now;
-        mouse_report.x += move_x;
-        mouse_report.y += move_y;
-        pointing_device_set_report(mouse_report);
-        pointing_device_send();
+    if (moved && (vec_x != 0 || vec_y != 0)) {
+        uint16_t now = timer_read();
+        uint16_t delta = now - last_time;
+
+        if (delta >= MOVE_DEBOUNCE_DELTA) {
+            last_time = now;
+
+            int exp = EXPONENTIAL_BOUND - delta;
+            if (exp < 1) exp = 1;
+
+            double factor = 1.0;
+            for (int i = 0; i < exp; i++) {
+                factor *= EXPONENTIAL_BASE;
+            }
+
+            int movement = (int)(BASE_MOVE_PIXELS * factor);
+
+            mouse_report.x += vec_x * movement;
+            mouse_report.y += vec_y * movement;
+
+            pointing_device_set_report(mouse_report);
+            pointing_device_send();
+        }
     }
 
     matrix_scan_user();
