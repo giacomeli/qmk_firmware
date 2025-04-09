@@ -6,17 +6,13 @@
 #define PIN_YP GP17
 #define PIN_YN GP18
 
-#define BASE_MOVE_PIXELS      7
-#define EXPONENTIAL_BOUND     10
-#define EXPONENTIAL_BASE      1.2
-#define MOVE_DEBOUNCE_DELTA   3
-
-static uint8_t last_state_xp = 1;
-static uint8_t last_state_xn = 1;
-static uint8_t last_state_yp = 1;
-static uint8_t last_state_yn = 1;
+#define TRACKBALL_MOVE_DELTA    1
+#define TRACKBALL_MAX_SPEED     2
+#define TRACKBALL_TIME_TO_MAX   20
+#define TRACKBALL_DEBOUNCE      5
 
 static uint16_t last_time = 0;
+static uint8_t repeat_counter = 0;
 
 void matrix_init_kb(void) {
     setPinInputHigh(PIN_XP);
@@ -26,62 +22,57 @@ void matrix_init_kb(void) {
     matrix_init_user();
 }
 
-void matrix_scan_kb(void) {
-    report_mouse_t mouse_report = pointing_device_get_report();
+static int calculate_speed(void) {
+    if (repeat_counter == 0) {
+        return TRACKBALL_MOVE_DELTA;
+    } else if (repeat_counter >= TRACKBALL_TIME_TO_MAX) {
+        return TRACKBALL_MOVE_DELTA * TRACKBALL_MAX_SPEED;
+    } else {
+        return (TRACKBALL_MOVE_DELTA * TRACKBALL_MAX_SPEED * repeat_counter) / TRACKBALL_TIME_TO_MAX;
+    }
+}
 
-    uint8_t state_xp = readPin(PIN_XP);
-    uint8_t state_xn = readPin(PIN_XN);
-    uint8_t state_yp = readPin(PIN_YP);
-    uint8_t state_yn = readPin(PIN_YN);
+void matrix_scan_kb(void) {
+    uint16_t now = timer_read();
+    uint16_t delta = now - last_time;
+
+    if (delta < TRACKBALL_DEBOUNCE) {
+        matrix_scan_user();
+        return;
+    }
+
+    last_time = now;
+
+    report_mouse_t mouse_report = pointing_device_get_report();
 
     int8_t vec_x = 0;
     int8_t vec_y = 0;
-    bool moved = false;
 
-    if (state_xp != last_state_xp) {
-        last_state_xp = state_xp;
-        vec_x += 1;
-        moved = true;
-    }
-    if (state_xn != last_state_xn) {
-        last_state_xn = state_xn;
-        vec_x -= 1;
-        moved = true;
-    }
-    if (state_yp != last_state_yp) {
-        last_state_yp = state_yp;
-        vec_y -= 1;
-        moved = true;
-    }
-    if (state_yn != last_state_yn) {
-        last_state_yn = state_yn;
-        vec_y += 1;
-        moved = true;
-    }
+    if (!readPin(PIN_XP)) vec_x += 1;
+    if (!readPin(PIN_XN)) vec_x -= 1;
+    if (!readPin(PIN_YP)) vec_y -= 1;
+    if (!readPin(PIN_YN)) vec_y += 1;
 
-    if (moved && (vec_x != 0 || vec_y != 0)) {
-        uint16_t now = timer_read();
-        uint16_t delta = now - last_time;
-
-        if (delta >= MOVE_DEBOUNCE_DELTA) {
-            last_time = now;
-
-            int exp = EXPONENTIAL_BOUND - delta;
-            if (exp < 1) exp = 1;
-
-            double factor = 1.0;
-            for (int i = 0; i < exp; i++) {
-                factor *= EXPONENTIAL_BASE;
-            }
-
-            int movement = (int)(BASE_MOVE_PIXELS * factor);
-
-            mouse_report.x += vec_x * movement;
-            mouse_report.y += vec_y * movement;
-
-            pointing_device_set_report(mouse_report);
-            pointing_device_send();
+    if (vec_x != 0 || vec_y != 0) {
+        if (repeat_counter < UINT8_MAX) {
+            repeat_counter++;
         }
+
+        int move = calculate_speed();
+
+        // ajustar diagonais
+        if (vec_x != 0 && vec_y != 0) {
+            vec_x = (vec_x * 181 + 128) / 256;
+            vec_y = (vec_y * 181 + 128) / 256;
+        }
+
+        mouse_report.x += vec_x * move;
+        mouse_report.y += vec_y * move;
+
+        pointing_device_set_report(mouse_report);
+        pointing_device_send();
+    } else {
+        repeat_counter = 0;
     }
 
     matrix_scan_user();
