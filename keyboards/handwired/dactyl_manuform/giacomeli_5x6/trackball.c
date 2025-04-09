@@ -15,30 +15,21 @@ static uint8_t last_state_xn = 1;
 static uint8_t last_state_yp = 1;
 static uint8_t last_state_yn = 1;
 
-static uint16_t last_time_xp = 0;
-static uint16_t last_time_xn = 0;
-static uint16_t last_time_yp = 0;
-static uint16_t last_time_yn = 0;
+static uint16_t last_time = 0;
 
-static int calculate_movement(uint8_t curr_state, uint8_t *last_state, uint16_t *last_time, bool positive) {
-    if (curr_state != *last_state) {
-        uint16_t now = timer_read();
-        uint16_t delta = now - *last_time;
-        *last_time = now;
-        *last_state = curr_state;
+static int calculate_movement(bool triggered, bool positive, uint16_t delta) {
+    if (!triggered) return 0;
 
-        int exp = EXPONENTIAL_BOUND - delta;
-        if (exp < 1) exp = 1;
+    int exp = EXPONENTIAL_BOUND - delta;
+    if (exp < 1) exp = 1;
 
-        double factor = 1.0;
-        for (int i = 0; i < exp; i++) {
-            factor *= EXPONENTIAL_BASE;
-        }
-
-        int movement = (int)(BASE_MOVE_PIXELS * factor);
-        return positive ? movement : -movement;
+    double factor = 1.0;
+    for (int i = 0; i < exp; i++) {
+        factor *= EXPONENTIAL_BASE;
     }
-    return 0;
+
+    int movement = (int)(BASE_MOVE_PIXELS * factor);
+    return positive ? movement : -movement;
 }
 
 void matrix_init_kb(void) {
@@ -57,15 +48,39 @@ void matrix_scan_kb(void) {
     uint8_t state_yp = readPin(PIN_YP);
     uint8_t state_yn = readPin(PIN_YN);
 
+    uint16_t now = timer_read();
+    uint16_t delta = now - last_time;
+
+    bool moved = false;
     int move_x = 0;
     int move_y = 0;
 
-    move_x += calculate_movement(state_xp, &last_state_xp, &last_time_xp, true);
-    move_x += calculate_movement(state_xn, &last_state_xn, &last_time_xn, false);
-    move_y += calculate_movement(state_yp, &last_state_yp, &last_time_yp, false);
-    move_y += calculate_movement(state_yn, &last_state_yn, &last_time_yn, true);
+    if (state_xp != last_state_xp) {
+        last_state_xp = state_xp;
+        moved = true;
+        move_x += calculate_movement(true, true, delta);
+    }
 
-    if (move_x != 0 || move_y != 0) {
+    if (state_xn != last_state_xn) {
+        last_state_xn = state_xn;
+        moved = true;
+        move_x += calculate_movement(true, false, delta);
+    }
+
+    if (state_yp != last_state_yp) {
+        last_state_yp = state_yp;
+        moved = true;
+        move_y += calculate_movement(true, false, delta);
+    }
+
+    if (state_yn != last_state_yn) {
+        last_state_yn = state_yn;
+        moved = true;
+        move_y += calculate_movement(true, true, delta);
+    }
+
+    if (moved) {
+        last_time = now;
         mouse_report.x += move_x;
         mouse_report.y += move_y;
         pointing_device_set_report(mouse_report);
