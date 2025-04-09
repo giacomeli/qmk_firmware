@@ -24,7 +24,8 @@
     "diode_direction": "COL2ROW",
     "features": {
         "bootmagic": false,
-        "mousekey": false,
+        "mousekey": true,
+        "encoder": false,
         "extrakey": false,
         "command": false,
         "nkro": false,
@@ -38,9 +39,10 @@
         "programmable_button": false,
         "audio": false,
         "raw": true,
-        "pointing_device": true
+        "joystick": false
     },
     "split": {
+        "enabled": true,
         "serial": {
             "driver": "vendor"
         },
@@ -60,7 +62,6 @@
             }
         }
     },
-
     "layouts": {
         "LAYOUT_5x6": {
             "layout": [

@@ -5,11 +5,13 @@
 #define _QWERTY 0
 #define _RAISE 1
 
+
 #define RAISE MO(_RAISE)
 
 void matrix_scan_user(void) {
     static bool debug_once = false;
 
+    //log pin state for debugging GP15, GP16, GP17 and GP18
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             if (matrix_is_on(row, col)) {
@@ -44,8 +46,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                     KC_LALT,   RAISE,         KC_ENT, KC_BTN1, KC_BTN2
     ),
     [_RAISE] = LAYOUT_5x6(
-        KC_GRV,  _______, _______, _______, _______, _______,         KC_BRMD,  KC_BRMU,  _______,    KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
-        KC_ESC,  _______, _______, _______, _______, _______,         KC_Y,     KC_U,     KC_I,    KC_O,     KC_P,     KC_RBRC,
+        KC_GRV,  _______, _______, _______, _______, _______,         KC_BRMD,  KC_BRMU,  _______, KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
+        KC_ESC,  _______, _______, _______, _______, _______,         KC_Y,     KC_U,     KC_I,    KC_O,    KC_P,     KC_RBRC,
         KC_LSFT, _______, _______, _______, _______, _______,         KC_LEFT,  KC_DOWN,  KC_UP,   KC_RIGHT, _______,  KC_PIPE,
         KC_LCTL, _______, _______, _______, _______, _______,         _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  RAISE,
 

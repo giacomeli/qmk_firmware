@@ -1,16 +1,7 @@
-MCU = RP2040
-BOOTLOADER = rp2040
 
-DATA_DRIVER = yes
-
-POINTING_DEVICE_DRIVER = analog_joystick
-POINTING_DEVICE_JOYSTICK = yes
-JOYSTICK_ENABLE = yes
-JOYSTICK_DRIVER = analog
-ANALOG_DRIVER_REQUIRED = yes
-
-SPLIT_KEYBOARD = yes
 KEYBOARD_FILES += keyboards/handwired/dactyl_manuform/giacomeli_5x6/keyboard.json
+SRC += trackball.c
 CONSOLE_ENABLE = yes
 DEBUG_MATRIX_SCAN_RATE = yes
-MOUSEKEY_ENABLE = yes
+POINTING_DEVICE_ENABLE = yes
+POINTING_DEVICE_DRIVER = custom
