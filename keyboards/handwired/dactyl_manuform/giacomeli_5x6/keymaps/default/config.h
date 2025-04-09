@@ -2,7 +2,6 @@
 // não defina MASTER_LEFT ou MASTER_RIGHT
 
 #define MATRIX_SCAN_USER
-#define DEBOUNCE 5
 #define PULLUP
 
 #define SERIAL_USART_FULL_DUPLEX

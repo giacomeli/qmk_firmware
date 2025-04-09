@@ -1,15 +1,70 @@
 #include QMK_KEYBOARD_H
 #include "analog.h"
 #include "print.h"
+#include "quantum.h"
+
+#define PIN_TRACKBALL_BLUE_LED GP22
 
 #define _QWERTY 0
 #define _RAISE 1
 
 
+#define PIN_XP GP15
+#define PIN_XN GP16
+#define PIN_YP GP17
+#define PIN_YN GP18
+
+
 #define RAISE MO(_RAISE)
+
+
+
+static bool last_xp = false;
+static bool last_xn = false;
+static bool last_yp = false;
+static bool last_yn = false;
+
+void matrix_init_kb(void) {
+
+    // Initialize the matrix
+    matrix_init_user();
+    // Set the pin modes for the trackball
+    setPinInput(PIN_XP);
+    setPinInput(PIN_XN);
+    setPinInput(PIN_YP);
+    setPinInput(PIN_YN);
+
+    // Set the pin modes for the blue LED
+    setPinOutput(PIN_TRACKBALL_BLUE_LED);
+    writePinHigh(PIN_TRACKBALL_BLUE_LED);
+}
 
 void matrix_scan_user(void) {
     static bool debug_once = false;
+    bool curr_xp = !readPin(PIN_XP);
+    bool curr_xn = !readPin(PIN_XN);
+    bool curr_yp = !readPin(PIN_YP);
+    bool curr_yn = !readPin(PIN_YN);
+
+
+    if (curr_xp && !last_xp) {
+        tap_code(QK_MOUSE_CURSOR_RIGHT);
+    }
+    if (curr_xn && !last_xn) {
+        tap_code(QK_MOUSE_CURSOR_LEFT);
+    }
+    if (curr_yp && !last_yp) {
+        tap_code(QK_MOUSE_CURSOR_UP);
+    }
+    if (curr_yn && !last_yn) {
+        tap_code(QK_MOUSE_CURSOR_DOWN);
+    }
+
+    last_xp = curr_xp;
+    last_xn = curr_xn;
+    last_yp = curr_yp;
+    last_yn = curr_yn;
+
 
     //log pin state for debugging GP15, GP16, GP17 and GP18
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {

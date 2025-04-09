@@ -24,12 +24,10 @@
     "diode_direction": "COL2ROW",
     "features": {
         "bootmagic": false,
-        "mousekey": true,
         "encoder": false,
         "extrakey": false,
         "command": false,
         "nkro": false,
-        "backlight": false,
         "combo": false,
         "leader": false,
         "dynamic_macro": false,
