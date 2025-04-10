@@ -15,8 +15,8 @@
 #define PIN_YN GP18
 
 
-#define RAISE TG(_RAISE)
-
+#define RAISE MO(_RAISE)
+#define TG_RAISE TG(_RAISE)
 
 #define OLED_DISPLAY_128X64
 
@@ -135,18 +135,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_1,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,       KC_7,   KC_8,   KC_9,    KC_0,    KC_MINS,  KC_EQL,
         KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,    KC_O,    KC_P,     KC_LBRC,
         KC_LSFT, KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,    KC_L,    KC_SCLN,  KC_QUOT,
-        RAISE, KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH,  KC_ACL2,
+        RAISE, KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH,  TG_RAISE,
 
                             KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
-                                    KC_LCTL, KC_LALT,         KC_ENT, KC_BTN1, KC_BTN2
+                                    KC_LALT, KC_LCTL,         KC_ENT, KC_BTN1, KC_BTN2
     ),
     [_RAISE] = LAYOUT_5x6(
         KC_GRV,  _______, _______, _______, _______, _______,         KC_BRMD,  KC_BRMU,  _______, KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
         KC_ESC,  _______, _______, _______, _______, _______,         KC_Y,     KC_U,     KC_I,    KC_O,    KC_P,     KC_RBRC,
         KC_LSFT, _______, _______, _______, _______, _______,         KC_LEFT,  KC_DOWN,  KC_UP,   KC_RIGHT, _______,  KC_PIPE,
-        RAISE, _______, _______, _______, _______, _______,         _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  KC_ACL0,
+        RAISE, _______, _______, _______, _______, _______,         _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  TG_RAISE,
 
-                                    KC_TAB, KC_DEL,  KC_LGUI,         KC_DEL, KC_SPACE,
-                                            KC_LCTL, KC_LALT,         KC_ENT, MS_WHLU, MS_WHLD
+                                    KC_ACL2, KC_SPACE, KC_LGUI,         KC_DEL, KC_SPACE,
+                                            KC_RALT, KC_LCTL,         KC_ENT, MS_WHLU, MS_WHLD
     )
 };
