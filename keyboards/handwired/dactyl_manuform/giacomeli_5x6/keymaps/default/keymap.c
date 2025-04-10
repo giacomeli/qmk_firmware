@@ -3,7 +3,7 @@
 #include "print.h"
 #include "quantum.h"
 
-#define PIN_TRACKBALL_BLUE_LED GP22
+#define PIN_TRACKBALL_RED_LED GP22
 
 #define _QWERTY 0
 #define _RAISE 1
@@ -15,8 +15,7 @@
 #define PIN_YN GP18
 
 
-#define RAISE MO(_RAISE)
-
+#define RAISE TG(_RAISE)
 
 
 static bool last_xp = false;
@@ -35,8 +34,8 @@ void matrix_init_kb(void) {
     setPinInput(PIN_YN);
 
     // Set the pin modes for the blue LED
-    setPinOutput(PIN_TRACKBALL_BLUE_LED);
-    writePinHigh(PIN_TRACKBALL_BLUE_LED);
+    setPinOutput(PIN_TRACKBALL_RED_LED);
+    writePinLow(PIN_TRACKBALL_RED_LED);
 }
 
 void matrix_scan_user(void) {
@@ -46,6 +45,13 @@ void matrix_scan_user(void) {
     bool curr_yp = !readPin(PIN_YP);
     bool curr_yn = !readPin(PIN_YN);
 
+    uint8_t layer = get_highest_layer(layer_state | default_layer_state);
+
+    if (layer == _RAISE) {
+        writePinHigh(PIN_TRACKBALL_RED_LED);
+    } else {
+        writePinLow(PIN_TRACKBALL_RED_LED);
+    }
 
     if (curr_xp && !last_xp) {
         tap_code(QK_MOUSE_CURSOR_RIGHT);
@@ -54,10 +60,18 @@ void matrix_scan_user(void) {
         tap_code(QK_MOUSE_CURSOR_LEFT);
     }
     if (curr_yp && !last_yp) {
-        tap_code(QK_MOUSE_CURSOR_UP);
+        if (layer == _RAISE) {
+            tap_code(KC_MS_WH_UP);  // scroll up
+        } else {
+            tap_code(QK_MOUSE_CURSOR_UP);
+        }
     }
     if (curr_yn && !last_yn) {
-        tap_code(QK_MOUSE_CURSOR_DOWN);
+        if (layer == _RAISE) {
+            tap_code(KC_MS_WH_DOWN);  // scroll down
+        } else {
+            tap_code(QK_MOUSE_CURSOR_DOWN);
+        }
     }
 
     last_xp = curr_xp;
@@ -95,18 +109,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_1,    KC_2,   KC_3,   KC_4,   KC_5,   KC_6,       KC_7,   KC_8,   KC_9,    KC_0,    KC_MINS,  KC_EQL,
         KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,       KC_Y,   KC_U,   KC_I,    KC_O,    KC_P,     KC_LBRC,
         KC_LSFT, KC_A,   KC_S,   KC_D,   KC_F,   KC_G,       KC_H,   KC_J,   KC_K,    KC_L,    KC_SCLN,  KC_QUOT,
-        KC_LCTL, KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH,  KC_ACL2,
+        RAISE, KC_Z,   KC_X,   KC_C,   KC_V,   KC_B,       KC_N,   KC_M,   KC_COMM, KC_DOT,  KC_SLSH,  KC_ACL2,
 
                             KC_TAB, KC_BSPC, KC_LGUI,         KC_DEL, KC_SPACE,
-                                    KC_LALT,   RAISE,         KC_ENT, KC_BTN1, KC_BTN2
+                                    KC_LCTL, KC_LALT,         KC_ENT, KC_BTN1, KC_BTN2
     ),
     [_RAISE] = LAYOUT_5x6(
         KC_GRV,  _______, _______, _______, _______, _______,         KC_BRMD,  KC_BRMU,  _______, KC_KB_MUTE,  KC_KB_VOLUME_DOWN, KC_KB_VOLUME_UP,
         KC_ESC,  _______, _______, _______, _______, _______,         KC_Y,     KC_U,     KC_I,    KC_O,    KC_P,     KC_RBRC,
         KC_LSFT, _______, _______, _______, _______, _______,         KC_LEFT,  KC_DOWN,  KC_UP,   KC_RIGHT, _______,  KC_PIPE,
-        KC_LCTL, _______, _______, _______, _______, _______,         _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  RAISE,
+        RAISE, _______, _______, _______, _______, _______,         _______,  KC_HOME,  KC_END,  _______,   KC_BSLS,  KC_ACL0,
 
                                     KC_TAB, KC_DEL,  KC_LGUI,         KC_DEL, KC_SPACE,
-                                            KC_LALT,   RAISE,         KC_ENT, MS_WHLU, MS_WHLD
+                                            KC_LCTL, KC_LALT,         KC_ENT, MS_WHLU, MS_WHLD
     )
 };
